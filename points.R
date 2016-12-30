@@ -56,16 +56,17 @@ ggplot(points, aes(x, y)) +
 # ggsave(paste("Students.png", sep=""), last_plot(), height = 7, width = 10)
 
 # На основе визуального анализа убираем данные по некоторым респондентам
-points <- points %>% filter(student != c(5, 14, 15, 20, 37, 44))
+# points <- points %>% filter(student != c(5, 14, 15, 20, 37, 44))
 
 ##########
 pointsUn <- gather(points, "xy", "coord", 1:2)
+pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),]
 
-ggplot(pointsUn, aes(coord)) + 
+ggplot(pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),], aes(coord)) + 
         geom_density() +
-        facet_wrap(xy~k, ncol = 5, labeller = labeller(.multi_line = FALSE)) +
+        facet_wrap(xy~student, ncol = 5, labeller = labeller(.multi_line = FALSE)) +
         theme_bw()
-# ggsave(paste("StepsDensity.png", sep=""), last_plot(), height = 7, width = 10)
+# ggsave(paste("./Графики/StudentsDensity.png", sep=""), last_plot(), height = 7, width = 10)
 
 ########## Описательные статистики
 # sapply(pointsUn[which(pointsUn$student==9),], mean)
@@ -87,14 +88,14 @@ tapply(pointsUn$coord, pointsUn$student, pearson.test)
 pv <- 0
 pvX <- 0
 pvY <- 0
-for (i in 1:63) {
+for (i in 1:st) {
         pvX[i] <- tapply(points$x, points$student, shapiro.test)[[i]][[2]]
         pvY[i] <- tapply(points$y, points$student, shapiro.test)[[i]][[2]]
         pv[i] <- tapply(pointsUn$coord, pointsUn$student, shapiro.test)[[i]][[2]]
 }
 
-sum(pvX < 0.05)
-sum(pvY < 0.05)
+sum(pvX < 0.05) / st
+sum(pvY < 0.05) / st
 sum(pv < 0.05)
 which(pv < 0.05)
 
@@ -118,7 +119,8 @@ qqplot.data(points$x)
 qqplot.data(points$y)
 qqplot.data(pointsUn$coord)
 
-tapply(pointsUn$coord, pointsUn$student, qqplot.data) 
+tapply(pointsUn$coord, pointsUn$xy, qqplot.data)
+tapply(points$x, points$student, qqplot.data) 
 
 ggplot(pointsUn[which(pointsUn$xy=="y"),]) +
         geom_qq(aes(sample = coord)) +
@@ -132,7 +134,7 @@ ggplot(pointsUn[which(pointsUn$xy=="y"),]) +
         theme_bw()
 # qqline()
 
-ggsave(paste("qqY.png", sep=""), last_plot(), height = 7, width = 10)
+# ggsave(paste("qqY.png", sep=""), last_plot(), height = 7, width = 10)
 
 plot(dnorm(seq(-4, 4, by=0.01)), type = 'l')
 pnorm(3)
