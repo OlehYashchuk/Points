@@ -5,8 +5,10 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(nortest)
+library(corrplot)
 
 # Указание рабочей директории
+
 getwd()
 # setwd("d:/Oleh/Репетиторство/Points-master")
 # setwd("D:/D/Репетиторство/Points")
@@ -32,7 +34,9 @@ summary(points)
 # Поиск выбросов
 points[which(points$x>600 | points$y>600),]
 # Чистка выбросов
-points <- points %>% filter(x <= 600, y <= 600)
+points <- points %>% 
+        filter(x <= 600, y <= 600, student != 48) %>% 
+        mutate(student = as.factor(student), k =  as.factor(k))
 
 # Рассеивание точек
 ggplot(data = points, aes(x, y)) +
@@ -59,7 +63,8 @@ ggplot(points, aes(x, y)) +
 # points <- points %>% filter(student != c(5, 14, 15, 20, 37, 44))
 
 ##########
-pointsUn <- gather(points, "xy", "coord", 1:2)
+pointsUn <- gather(points, "xy", "coord", 1:2) %>% 
+        mutate(k = as.factor(k), student = as.factor(student), xy = as.factor(xy))
 pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),]
 
 ggplot(pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),], aes(coord)) + 
@@ -76,7 +81,9 @@ ggplot(pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),], aes(coord)) 
 # ggplot() + aes(c1) + geom_histogram(binwidth = 15)
 # ggplot() + aes(c1) + geom_density()
 
-########## Проверка на нормальность
+###############################################################################
+# Проверка на нормальность
+###############################################################################
 pearson.test(points$y)
 cvm.test(points$x)
 ad.test(points$x)
@@ -99,7 +106,9 @@ sum(pvY < 0.05) / st
 sum(pv < 0.05)
 which(pv < 0.05)
 
+###############################################################################
 # Построение графиков ку-ку
+###############################################################################
 qqplot.data <- function (vec) # argument: vector of numbers
 {
         # following four lines from base R's qqline()
@@ -136,6 +145,118 @@ ggplot(pointsUn[which(pointsUn$xy=="y"),]) +
 
 # ggsave(paste("qqY.png", sep=""), last_plot(), height = 7, width = 10)
 
-plot(dnorm(seq(-4, 4, by=0.01)), type = 'l')
+###############################################################################
+# dnorm = p(X)
+# qnorm = F(x)
+# pnorm = p-value(x)
+
+plot(dnorm(seq(-4, 4, by=0.01)), type = 'l'); abline(h=0)
 pnorm(3)
 qnorm(pnorm(3))
+
+###############################################################################
+# Корреляция 
+###############################################################################
+col3 <- colorRampPalette(c("red", "white", "blue"))
+
+pointsCor <- list()
+pointsCor$x <- pointsUn %>% spread(student, coord) %>% 
+        filter(xy == 'x') %>% select(-c(k, xy))
+pointsCor$y <- pointsUn %>% spread(student, coord) %>% 
+        filter(xy == 'y') %>% select(-c(k, xy))
+
+mCor <- list()
+mCor$xP <- cor(pointsCor$x)
+mCor$yP <- cor(pointsCor$y)
+mCor$xS <- cor(pointsCor$x, method = 'spearman')
+mCor$yS <- cor(pointsCor$y, method = 'spearman')
+
+# sum(abs(mCor$xP))
+# sum(abs(mCor$xS))
+# sum(abs(mCor$yP))
+# sum(abs(mCor$yS))
+
+corrplot(mCor$xP, method = "ellipse",  type="lower", col=col3(200), 
+         order="hclust", 
+         title = "Кореляція Пирсона")
+corrplot(mCor$xS, method = "ellipse",  type="lower", col=col3(200), 
+         order="hclust", 
+         title = "Кореляція Спірмена")
+
+
+########################################
+# Рассчет примера
+########################################
+mCor$xP[12, 11]
+
+cor(points$x[points$student==11], points$x[points$student==12])
+
+covv <- mean(points$x[points$student==11] * points$x[points$student==12]) -
+mean(points$x[points$student==11]) * mean(points$x[points$student==12])
+
+mn <- sqrt(14 / 15)
+
+sdd <- (sd(points$x[points$student==11])*mn) *
+(sd(points$x[points$student==12])*mn)
+
+covv / sdd
+
+plot(points$x[points$student==11], points$x[points$student==12])
+
+# wb <- c("white","black")
+# corrplot(Mx, order="hclust", addrect=2, col=wb, bg="gold2")
+# corrplot(Mx, order="hclust", addrect=3)
+# corrplot.mixed(Mx, lower="ellipse", upper="circle")
+# corrplot(Mx, order="AOE", cl.pos="b", tl.pos="d", tl.srt=60)
+###############################################################################
+
+mCor$xP
+pointsCor$x
+pointsCor$y
+
+mCor <- list()
+mCor$xP <- cor(pointsCor$x)
+mCor$yP <- cor(pointsCor$y)
+mCor$xS <- cor(pointsCor$x, method = 'spearman')
+mCor$yS <- cor(pointsCor$y, method = 'spearman')
+
+mnk <- function(data, user, k = 2, ...) {
+        mCor <- list()
+        mCor$xP <- cor(data$x)
+        mCor$yP <- cor(data$y)
+        mCor$xS <- cor(data$x, method = 'spearman')
+        mCor$yS <- cor(data$y, method = 'spearman')
+        
+        which(mCor$xP)
+}
+
+# sort(mCor$xP[-1,1], decreasing = T)[1:2]
+
+a <- which(mCor$xP[-1,1] %in% sort(mCor$xP[-1,1], decreasing = T)[1:2])
+pointsCor$x[,a] 
+
+x <- pointsCor$x[,a] 
+
+
+q <- 2 / dim(pointsCor$x)[1]
+which(pointsCor$x[1] >= quantile(unlist(pointsCor$x[1]), probs = 1-q))
+
+intersect(mCor$xP[-1,1], sort(mCor$xP[-1,1], decreasing = T)[1:2])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
