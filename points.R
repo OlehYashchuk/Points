@@ -176,12 +176,16 @@ mCor$yS <- cor(pointsCor$y, method = 'spearman')
 # sum(abs(mCor$yP))
 # sum(abs(mCor$yS))
 
-corrplot(mCor$xP, method = "ellipse",  type="lower", col=col3(200), 
+corrplot(mCor$yP, method = "ellipse",  type="lower", col=col3(200), 
          order="hclust", 
-         title = "Кореляція Пирсона")
-corrplot(mCor$xS, method = "ellipse",  type="lower", col=col3(200), 
+         title = "Кореляція Пирсона, y")
+# dev.cur()
+# ggsave("Графики/Pearson_x.png", dev.cur(), height = 7, width = 10)
+
+corrplot(mCor$yS, method = "ellipse",  type="lower", col=col3(200), 
          order="hclust", 
-         title = "Кореляція Спірмена")
+         title = "Кореляція Спірмена, y")
+
 
 
 ########################################
@@ -202,6 +206,16 @@ sdd <- (sd(points$x[points$student==11])*mn) *
 covv / sdd
 
 plot(points$x[points$student==11], points$x[points$student==12])
+
+
+sd(a)*mn
+a <- points$x[points$student==11]
+b <- points$x[points$student==12]
+am <- mean(a)
+an <- (a-am)^2
+sqrt(sum(an)/14)*mn
+
+sum(a*b/15)
 
 # wb <- c("white","black")
 # corrplot(Mx, order="hclust", addrect=2, col=wb, bg="gold2")
