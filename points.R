@@ -1,6 +1,9 @@
 rm(list = ls())
 
 # Подключение пакетов
+# install.packages("dplyr")
+# install.packages("ggplot2")
+# install.packages("colorspace")
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -65,7 +68,7 @@ ggplot(points, aes(x, y)) +
 ##########
 pointsUn <- gather(points, "xy", "coord", 1:2) %>% 
         mutate(k = as.factor(k), student = as.factor(student), xy = as.factor(xy))
-pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),]
+# pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),]
 
 ggplot(pointsUn[which(pointsUn$xy=="x" & pointsUn$student <= 30),], aes(coord)) + 
         geom_density() +
@@ -176,7 +179,7 @@ mCor$yS <- cor(pointsCor$y, method = 'spearman')
 # sum(abs(mCor$yP))
 # sum(abs(mCor$yS))
 
-corrplot(mCor$yP, method = "ellipse",  type="lower", col=col3(200), 
+corrplot(mCor$yP, method = "ellipse",  type="full", col=col3(200), 
          order="hclust", 
          title = "Кореляція Пирсона, y")
 # dev.cur()
@@ -191,7 +194,7 @@ corrplot(mCor$yS, method = "ellipse",  type="lower", col=col3(200),
 ########################################
 # Рассчет примера
 ########################################
-mCor$xP[12, 11]
+mCor$xS[12, 11]
 
 cor(points$x[points$student==11], points$x[points$student==12])
 
@@ -207,6 +210,12 @@ covv / sdd
 
 plot(points$x[points$student==11], points$x[points$student==12])
 
+sort(a)
+sort(b)
+ar <- rank(a)
+br <- rank(b)
+1-6*sum((ar-br)^2)/(15*(15^2-1))
+
 
 sd(a)*mn
 a <- points$x[points$student==11]
@@ -216,6 +225,13 @@ an <- (a-am)^2
 sqrt(sum(an)/14)*mn
 
 sum(a*b/15)
+
+
+install.packages("impute")
+library(kNNImpute)
+
+
+
 
 # wb <- c("white","black")
 # corrplot(Mx, order="hclust", addrect=2, col=wb, bg="gold2")
@@ -246,8 +262,13 @@ mnk <- function(data, user, k = 2, ...) {
 
 # sort(mCor$xP[-1,1], decreasing = T)[1:2]
 
+mCor$xP[51,52]
 a <- which(mCor$xP[-1,1] %in% sort(mCor$xP[-1,1], decreasing = T)[1:2])
-pointsCor$x[,a] 
+pointsCor$x[,a]
+
+ru <- mean(unlist(pointsCor$x[1,]))
+
+
 
 x <- pointsCor$x[,a] 
 
