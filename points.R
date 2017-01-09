@@ -153,6 +153,8 @@ source("rmse.R")
                                   pointsCor)
     }
     
+    
+    
     # kRMSE$k <- kRMSE$k[-c(1:14)]
     # kRMSE$pearson <- kRMSE$pearson[-c(1:14)]
     # kRMSE$spearman <- kRMSE$spearman[-c(1:14)]
@@ -195,6 +197,8 @@ ggplot() +
                   y = min(kRMSE$spearman[-min]),
                   label = round(kRMSE$spearman[which(kRMSE$spearman[-min] == min(kRMSE$spearman[-min]))+1])),
               hjust=0,vjust=-1, size = 4) +
+    
+    # theme(legend.position = "left") + guides(shape = "legend", fill = 'none') +
     
     labs(x = 'k Nearest Neighbors', y = 'RMSE')
 
