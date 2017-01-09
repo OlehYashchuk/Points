@@ -11,20 +11,22 @@ knn <- function(data, k, corMethod = "pearson", ...) {
     x <- as.matrix(data$x)
     y <- as.matrix(data$y)
     
+    pointsNumber <- dim(as.matrix(data$x))[1]
+    
     for (i in 1:dim(data$x)[2]) {
         
         neighbor <- which(mCor$x[i,] %in% sort(mCor$x[i,], decreasing = TRUE)[c(2:k+1)])
         
         numerator <- 0
         denumerator <- 0
-        meani <- mean(x[-15,i])
+        meani <- mean(x[-pointsNumber,i])
         
         for (j in neighbor) {
-            numerator <- numerator + mCor$x[i, j] * (x[15, j] - mean(x[, j]))
+            numerator <- numerator + mCor$x[i, j] * (x[pointsNumber, j] - mean(x[, j]))
             denumerator <- denumerator + abs(mCor$x[i, j])
         }
         
-        dataPredict$x[15, i] <- meani + numerator / denumerator
+        dataPredict$x[pointsNumber, i] <- meani + numerator / denumerator
     }
     
     for (i in 1:dim(data$y)[2]) {
@@ -33,16 +35,17 @@ knn <- function(data, k, corMethod = "pearson", ...) {
         
         numerator <- 0
         denumerator <- 0
-        meani <- mean(y[-15,i])
+        meani <- mean(y[-pointsNumber,i])
         
         for (j in neighbor) {
-            numerator <- numerator + mCor$y[i, j] * (y[15, j] - mean(y[, j]))
+            numerator <- numerator + mCor$y[i, j] * (y[pointsNumber, j] - mean(y[, j]))
             denumerator <- denumerator + abs(mCor$y[i, j])
         }
         
-        dataPredict$y[15, i] <- meani + numerator / denumerator
+        dataPredict$y[pointsNumber, i] <- meani + numerator / denumerator
     }
     
-    return(list(x = dataPredict$x, y = dataPredict$y,
-                xCor = mCor$x, yCor = mCor$y))
+    return(list(x = dataPredict$x, y = dataPredict$y))
+                # ,
+                # xCor = mCor$x, yCor = mCor$y))
 }

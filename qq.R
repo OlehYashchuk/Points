@@ -23,7 +23,7 @@ qqplot.data(pointsUn$coord)
 tapply(pointsUn$coord, pointsUn$xy, qqplot.data)
 tapply(points$x, points$student, qqplot.data) 
 
-ggplot(pointsUn[which(pointsUn$xy=="y"),]) +
+ggplot(pointsUn[which(pointsUn$xy=="x"),]) +
         geom_qq(aes(sample = coord)) +
         # geom_abline(intercept=quantile(c(0.25, 0.75))[1]-
         #                     diff(quantile(c(0.25, 0.75)))/
@@ -35,4 +35,4 @@ ggplot(pointsUn[which(pointsUn$xy=="y"),]) +
         theme_bw()
 # qqline()
 
-# ggsave(paste("qqY.png", sep=""), last_plot(), height = 7, width = 10)
+ggsave(paste("Графики/qqX.png", sep=""), last_plot(), height = 7, width = 10)

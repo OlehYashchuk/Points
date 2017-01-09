@@ -36,19 +36,56 @@ points[which(points$x>600 | points$y>600),]
 # На основе визуального анализа убираем данные по некоторым респондентам
 exclude <- c(5, 14, 15, 20, 22, 24, 34, 37, 42, 44, 48)
 '%!in%' <- function(x,y)!('%in%'(x,y))
-points <- points[,-5]
+# points <- points[,-5]
+
 points <- points %>% 
         filter(x <= 600, y <= 600) %>% 
         filter(student %!in%  exclude) %>%
-        select(-student) %>%
-        mutate(student = as.factor(rep(1:(dim(points)[1]/p), 
-                                       each = dim(points)[1]/st)),
-               k =  as.factor(k))
+        select(-student) 
 
 st <- dim(points)[1]/p
-# student <- rep(1:st, each = dim(points)[1]/st)
-# points <- tbl_df(cbind(points, student))
+student <- rep(1:st, each = dim(points)[1]/st)
 
+# points <- points %>% mutate(student = as.factor(rep(1:st, each = dim(points)[1]/st)),
+#                k =  as.factor(k))
+
+points <- points %>% mutate(student = as.factor(student), k =  as.factor(k))
+    
+# Добавить данные
+addStudents <- 1000
+
+# rnorm()
+# set.seed(999)
+# x <- runif(addStudents * p, 0, 600)
+# y <- runif(addStudents * p, 0, 600)
+# plot(x, y)
+
+set.seed(998)
+x <- rnorm(addStudents * p, 300, 73)
+set.seed(999)
+y <- rnorm(addStudents * p, 300, 73)
+# plot(x, y)
+range(x)
+range(y)
+
+st <- st + addStudents
+student <- rep((st-addStudents+1):st, each = p)
+knew <- rep(1:15, times = addStudents)
+pointsNew <- tbl_df(cbind(x, y, knew, student))
+colnames(pointsNew) <- c("x", "y", "k", 'student')
+pointsNew %>% mutate(x = as.integer(x), y = as.integer(y), 
+                     k = as.factor(k), student = as.factor(student))
+pointsNew$x <- as.integer(pointsNew$x)
+pointsNew$y <- as.integer(pointsNew$y)
+pointsNew$k <- as.factor(pointsNew$k)
+pointsNew$student <- as.factor(pointsNew$student)
+
+points <- points %>% bind_rows(pointsNew)
+points$student <- as.factor(points$student)
+# levels(points$student)
+
+# points %>% bind_rows(as.integer(x), as.integer(y), 
+                     # as.factor(knew), as.factor(student))
 
 # Рассеивание точек
 ggplot(data = points, aes(x, y)) +
@@ -57,28 +94,31 @@ ggplot(data = points, aes(x, y)) +
         scale_x_discrete(limits=seq(limMin, limMax, by = limMax/p)) +
         scale_y_discrete(limits=seq(limMin, limMax, by = limMax/p)) +
         theme(legend.position = "none") + guides(fill = 'none') +
-        labs(title = 'Рассеивание точек') +
+        # labs(title = 'Рассеивание точек') +
         theme_bw()
-# ggsave(paste("Points.png", sep=""), last_plot(), height = 6, width = 6)
+# ggsave(paste("Графики/Points.png", sep=""), last_plot(), height = 6, width = 6)
 
 ggplot(points, aes(x, y)) + 
-        geom_point(alpha=0.7, size=2.5, aes(color=k)) +
-        facet_wrap(~student, labeller = label_both)+
-        # theme(legend.position = 'none') +
-        labs(title = 'Поведение респондентов') +
-        theme(legend.position="bottom") +
+        geom_point(alpha=0.7, size=2.5, aes(color=student)) +
+        facet_wrap(~k, labeller = label_both)+
+        theme(legend.position = 'none') +
+        # labs(title = 'Поведение респондентов') +
+        # theme(legend.position="bottom") +
         theme_bw()
-# ggsave(paste("Students.png", sep=""), last_plot(), height = 7, width = 10)
+# ggsave(paste("Графики/Steps.png", sep=""), last_plot(), height = 7, width = 12)
 
 ########## Плотность распределения данных 
 pointsUn <- gather(points, "xy", "coord", 1:2) %>% 
         mutate(k = as.factor(k), student = as.factor(student), xy = as.factor(xy))
 
-ggplot(pointsUn[which(pointsUn$xy=="x"),], aes(coord)) + 
-        geom_density() +
-        facet_wrap(xy~student, ncol = 5, labeller = labeller(.multi_line = FALSE)) +
-        theme_bw()
-# ggsave(paste("./Графики/StudentsDensity.png", sep=""), last_plot(), height = 7, width = 10)
+ggplot(pointsUn[which(pointsUn$xy=="y"),], aes(coord)) + 
+    labs(x = 'y') +    
+    geom_density() +
+    facet_wrap(xy~student, labeller = labeller(.multi_line = FALSE)) +
+    theme_bw()
+
+# ggsave(paste("./Графики/StudentsDensity_y.png", sep=""), last_plot(),
+#        height = 7, width = 10)
 
 ########## Описательные статистики
 # sapply(pointsUn[which(pointsUn$student==9),], mean)
