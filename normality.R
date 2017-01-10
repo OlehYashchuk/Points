@@ -1,14 +1,6 @@
 ###############################################################################
 # Проверка на нормальность
 ###############################################################################
-pearson.test(points$y)
-cvm.test(points$x)
-ad.test(points$x)
-lillie.test(points$x)
-sf.test(points$x)
-shapiro.test(points$x)
-tapply(pointsUn$coord, pointsUn$student, pearson.test)
-
 pv <- 0
 pvX <- 0
 pvY <- 0
@@ -22,6 +14,17 @@ sum(pvX < 0.05) / st
 sum(pvY < 0.05) / st
 sum(pv < 0.05)
 which(pv < 0.05)
+
+# Возможные тесты
+pearson.test(points$ч)
+cvm.test(points$x)
+ad.test(points$x)
+lillie.test(points$x)
+sf.test(points$x)
+shapiro.test(points$x)
+
+tapply(pointsUn$coord, pointsUn$student, pearson.test)
+
 ###############################################################################
 # dnorm = p(X)
 # qnorm = F(x)
