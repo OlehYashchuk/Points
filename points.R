@@ -8,6 +8,8 @@ head(pointsCor$x, 5)
 a <- matrix(runif(25, 0, 600), 5, 5)
 b <- ccf(a[1,], a[2,])
 
+# plot(a[1,], a[2,])
+
 ggplot() + geom_line(aes(x = c(1:5), y = a[1, ])) +
         geom_line(aes(x = c(1:5), y = a[2, ]))
 
@@ -20,6 +22,18 @@ str(unlist(pointsCor$x))
 
 as.data.frame(pointsCor$x)
 b <- acf(pointsCor$x, lag.max = 0)
+
+
+install.packages("irr")
+library(irr)
+
+kendall(a[2:3,])
+
+t(a)
+a
+
+kendall(t(pointsCor$x))
+
 
 
 

@@ -7,7 +7,7 @@ rmse <- function(true, estimate, from = 1, to = 0, ...) {
         studentsNumber <- dim(as.matrix(true$x))[2]
         
         # Îïğåäåëÿåì ğåñïîíäåíòîâ ïî òî÷êàì êîòîğûõ ñ÷èòàåì RMSE
-        if (to = 0) {
+        if (to == 0) {
                 # Åñëè íà âõîäå â ôóíêöèş from è to íå çàäàíû, 
                 # òîãäà RMSE ñ÷èòàåì äëÿ ïîëíûõ äàííûõ
                 students <- as.factor(c(from:studentsNumber))
