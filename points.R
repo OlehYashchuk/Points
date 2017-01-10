@@ -1,6 +1,28 @@
 source("knn.R")
 source("rmse.R")
 
+# mCor$y <- cor(pointsCor$x)
+
+head(pointsCor$x, 5)
+
+a <- matrix(runif(25, 0, 600), 5, 5)
+b <- ccf(a[1,], a[2,])
+
+ggplot() + geom_line(aes(x = c(1:5), y = a[1, ])) +
+        geom_line(aes(x = c(1:5), y = a[2, ]))
+
+b <- acf(a)
+b$acf
+
+acf(matrix(pointsCor$x))
+
+str(unlist(pointsCor$x))
+
+as.data.frame(pointsCor$x)
+b <- acf(pointsCor$x, lag.max = 0)
+
+
+
 listRMSE <- list()
 pointsCor <- list()
 
@@ -64,24 +86,24 @@ ggplot(kRMSEtbl, aes(x = k)) +
         coord_cartesian(xlim = c(0, 52)) + 
         
         # geom_point(alpha=1, size=3, color = 'red',
-        #            aes(x = k[which(pearson == min(pearson))], 
+        #            aes(x = k[which(pearson == min(pearson))],
         #                y = min(pearson))) +
         # 
         # geom_point(alpha=1, size=3, color = 'blue',
-        #            aes(x = k[which(spearman == min(spearman))], 
+        #            aes(x = k[which(spearman == min(spearman))],
         #                y = min(spearman), label = spearman)) +
         # 
-        # geom_text(aes(x = k[which(pearson == min(pearson))], 
+        # geom_text(aes(x = k[which(pearson == min(pearson))],
         #               y = min(pearson),
-#               label = round(pearson[which(pearson == min(pearson))])),
-#           hjust=0,vjust=-1, size = 4) +
-# 
-# geom_text(aes(x = k[which(spearman == min(spearman))], 
-#               y = min(spearman),
-#               label = round(spearman[which(spearman == min(spearman))])),
-#           hjust=0,vjust=-1, size = 4) +
+        #               label = round(pearson[which(pearson == min(pearson))])),
+        #           hjust=0,vjust=-1, size = 4) +
+        # 
+        # geom_text(aes(x = k[which(spearman == min(spearman))],
+        #               y = min(spearman),
+        #               label = round(spearman[which(spearman == min(spearman))])),
+        #           hjust=0,vjust=-1, size = 4) +
 
-labs(x = 'k Nearest Neighbors', y = 'RMSE')
+        labs(x = 'k Nearest Neighbors', y = 'RMSE')
 
 # ggsave(paste("Графики/kNeighbors.png", sep=""), last_plot(), 
 #        height = 7, width = 12)

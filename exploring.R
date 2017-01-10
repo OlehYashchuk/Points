@@ -74,11 +74,30 @@ pointsNew <- tbl_df(cbind(x, y, k, student)) # объединяем массив новых данных
 points <- bind_rows(points, pointsNew) # объединяем новые данные со старыми
 
 # задаём типы данных
-points <- mutate(points, 
-                    x = as.integer(x), 
-                    y = as.integer(y),
-                    k = as.factor(k), 
-                    student = as.factor(student))
+points <- mutate(points,
+                 x = as.integer(x),
+                 y = as.integer(y),
+                 k = as.factor(k),
+                 student = as.factor(student))
+
+# Задание новых факторов
+points <- mutate(points,
+                 x = as.integer(x),
+                 y = as.integer(y),
+                 k = as.factor(k),
+                 student = as.factor(student),
+                 dc = sqrt((x-300)^2+(y-300)^2))
+
+
+# Нормализация
+range((points$x - mean(points$x)) / sd(points$x))
+sd(points$x)
+range(scale(points$x))
+d <- tapply(points$y, points$student, scale)
+range(d)
+
+
+
 
 # создадим линейный вид данных
 pointsUn <- gather(points, "xy", "coord", 1:2) %>%
