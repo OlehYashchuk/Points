@@ -35,4 +35,4 @@ ggplot(pointsUn[which(pointsUn$xy=="x"),]) +
         theme_bw()
 # qqline()
 
-ggsave(paste("Графики/qqX.png", sep=""), last_plot(), height = 7, width = 10)
+# ggsave(paste("Графики/qqX.png", sep=""), last_plot(), height = 7, width = 10)

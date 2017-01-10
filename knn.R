@@ -46,6 +46,4 @@ knn <- function(data, k, corMethod = "pearson", ...) {
     }
     
     return(list(x = dataPredict$x, y = dataPredict$y))
-                # ,
-                # xCor = mCor$x, yCor = mCor$y))
 }

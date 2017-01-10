@@ -6,6 +6,7 @@ library(tidyr)
 library(ggplot2)
 library(nortest)
 library(corrplot)
+library(tictoc)
 
 # Указание рабочей директории
 getwd()
@@ -13,7 +14,8 @@ getwd()
 # setwd("D:/D/Репетиторство/Points")
 
 # Считка данных
-points <- read.table("points.txt", header = F, col.names = c("x", "y"), sep = ";")
+points <- read.table("Данные/points.txt", 
+                     header = F, col.names = c("x", "y"), sep = ";")
 # Границы области
 limMin <- 0
 limMax <- 600
@@ -33,10 +35,8 @@ summary(points)
 # Поиск выбросов
 points[which(points$x>600 | points$y>600),]
 # Чистка выбросов
-# На основе визуального анализа убираем данные по некоторым респондентам
 exclude <- c(5, 14, 15, 20, 22, 24, 34, 37, 42, 44, 48)
 '%!in%' <- function(x,y)!('%in%'(x,y))
-# points <- points[,-5]
 
 points <- points %>% 
         filter(x <= 600, y <= 600) %>% 
@@ -46,20 +46,12 @@ points <- points %>%
 st <- dim(points)[1]/p
 student <- rep(1:st, each = dim(points)[1]/st)
 
-# points <- points %>% mutate(student = as.factor(rep(1:st, each = dim(points)[1]/st)),
-#                k =  as.factor(k))
-
 points <- points %>% mutate(student = as.factor(student), k =  as.factor(k))
     
-# Добавить данные
+# Генерируем случайное поведение респондентов
 addStudents <- 1000
 
-# rnorm()
-# set.seed(999)
-# x <- runif(addStudents * p, 0, 600)
-# y <- runif(addStudents * p, 0, 600)
-# plot(x, y)
-
+# set.seed - для воспроизводимости случайного набора данных
 set.seed(998)
 x <- rnorm(addStudents * p, 300, 73)
 set.seed(999)
@@ -84,39 +76,41 @@ points <- points %>% bind_rows(pointsNew)
 points$student <- as.factor(points$student)
 # levels(points$student)
 
-# points %>% bind_rows(as.integer(x), as.integer(y), 
-                     # as.factor(knew), as.factor(student))
-
+###############################################################################
+# Разведочный анализ данных
+###############################################################################
 # Рассеивание точек
 ggplot(data = points, aes(x, y)) +
-        geom_point(alpha=0.7, size=2.5, shape=21, 
-                   aes(fill=factor(student))) + 
+        geom_point(alpha=0.7, size=2.5, shape=21, aes(fill=factor(student))) + 
         scale_x_discrete(limits=seq(limMin, limMax, by = limMax/p)) +
         scale_y_discrete(limits=seq(limMin, limMax, by = limMax/p)) +
         theme(legend.position = "none") + guides(fill = 'none') +
         # labs(title = 'Рассеивание точек') +
         theme_bw()
+# Сохранить график
 # ggsave(paste("Графики/Points.png", sep=""), last_plot(), height = 6, width = 6)
 
+# Рассеивание точек по шагам
 ggplot(points, aes(x, y)) + 
-        geom_point(alpha=0.7, size=2.5, aes(color=student)) +
+        geom_point(alpha=0.7, size=2.5, aes(color=student),show.legend = FALSE) +
         facet_wrap(~k, labeller = label_both)+
-        theme(legend.position = 'none') +
         # labs(title = 'Поведение респондентов') +
-        # theme(legend.position="bottom") +
         theme_bw()
+# Сохранить график
 # ggsave(paste("Графики/Steps.png", sep=""), last_plot(), height = 7, width = 12)
 
-########## Плотность распределения данных 
+# Плотность распределения
 pointsUn <- gather(points, "xy", "coord", 1:2) %>% 
-        mutate(k = as.factor(k), student = as.factor(student), xy = as.factor(xy))
+        mutate(k = as.factor(k), 
+               student = as.factor(student), 
+               xy = as.factor(xy))
 
 ggplot(pointsUn[which(pointsUn$xy=="y"),], aes(coord)) + 
     labs(x = 'y') +    
     geom_density() +
     facet_wrap(xy~student, labeller = labeller(.multi_line = FALSE)) +
     theme_bw()
-
+# Сохранить график
 # ggsave(paste("./Графики/StudentsDensity_y.png", sep=""), last_plot(),
 #        height = 7, width = 10)
 
