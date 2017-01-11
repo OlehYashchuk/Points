@@ -1,46 +1,80 @@
 source("knn.R")
 source("rmse.R")
+a <- list()
+a$x <- matrix(runif(40, 0, 600), 5, 8)
+a$y <- matrix(runif(40, 0, 600), 5, 8)
+# ggplot() + geom_line(aes(x = c(1:5), y = a[1, ])) +
+#         geom_line(aes(x = c(1:5), y = a[2, ]))
 
-# mCor$y <- cor(pointsCor$x)
+concord <- matrix(ncol = 8, nrow = 8)
 
-head(pointsCor$x, 5)
+for (i in 1:5) {
+        for (j in 1:8) {
+concord[i, j] <- kendall(t(cbind(data.frame(a$x[,c(i,j)]),
+                                 data.frame(a$y[,c(i,j)]))))$value
+        # concord[j, i] <- concord[i, j]
+        }
+}
+for (i in 1:8) {
+        for (j in 1:8) {
+                concord[j, i] <- kendall(t(cbind(data.frame(a$x[,c(j,i)]),
+                                                 data.frame(a$y[,c(j,i)]))))$value
+                # concord[j, i] <- concord[i, j]
+        }
+}
 
-a <- matrix(runif(25, 0, 600), 5, 5)
-b <- ccf(a[1,], a[2,])
+isSymmetric(concord)
 
-# plot(a[1,], a[2,])
+concord
+students1 <- as.factor(c(1:1052))
+trueStudents1 <- which(colnames(c$x) %in% students1)
+pointsCor
+sum(trueStudents1)
 
-ggplot() + geom_line(aes(x = c(1:5), y = a[1, ])) +
-        geom_line(aes(x = c(1:5), y = a[2, ]))
+knn(pointsCor, 1, corMethod = "concord")
+kendall(c(pointsCor$x[,1:2], pointsCor$y[,1:2]))
 
-b <- acf(a)
-b$acf
+cp <- knn(pointsCor, 5, corMethod = "pearson")
+# c <- knn(pointsCor, 5, corMethod = "concord")
+tic()
+# c1 <- knn(pointsCor, 5, corMethod = "concord") 
+toc()
 
-acf(matrix(pointsCor$x))
-
-str(unlist(pointsCor$x))
-
-as.data.frame(pointsCor$x)
-b <- acf(pointsCor$x, lag.max = 0)
-
-
-install.packages("irr")
-library(irr)
-
-kendall(a[2:3,])
-
-t(a)
-a
-
-kendall(t(pointsCor$x))
+rmse(cp, pointsCor)
 
 
+sqrt(
+        mean(
+                sqrt(
+                        # [c_x^(i,j)-c_x(i,j)]^2
+                        (c$x[15,] - 
+                                 c$x[15,])^2 +
+                                
+                                # [c_y^(i,j)-c_y(i,j)]^2
+                                (pointsCor$y[15,] - 
+                                         pointsCor$y[15,])^2
+                )^2
+        )
+)
 
 
+
+sum(is.na(c$x)) + sum(!is.na(c$x))
+sum(is.na(concord)) + sum(!is.na(concord))
+
+
+
+
+
+
+
+
+tic()
 listRMSE <- list()
 pointsCor <- list()
 
-selectedSteps <- 15
+for (j in 5:15) {
+selectedSteps <- j
 
 # Данные в матричном виде
 # матрица (k, x)
@@ -61,20 +95,25 @@ pointsCor$y <- pointsUn %>%
 stepsK <- c(1:5, seq(10, 50, 5))
 
 kRMSE <- list()
-s <- 0
-
-tic()
+# s <- 0
 for (i in stepsK) {
         s <- s + 1
-
+        # kRMSE$k[s] <- list()
         # c <- knn(pointsCor, i, corMethod = "pearson")
+        kRMSE$j[s] <- j
         kRMSE$k[s] <- i
-        kRMSE$pearsonReal[s] <- rmse(knn(pointsCor, i, corMethod = "pearson"), 
-                                     pointsCor, from = 1, to = 52)
-        kRMSE$spearmanReal[s] <- rmse(knn(pointsCor, i, corMethod = "spearman"), 
-                                      pointsCor, from = 1, to = 52)
+        kRMSE$pearson[s] <- rmse(knn(pointsCor, i, corMethod = "pearson"))
+                                     # pointsCor, from = 1, to = 52)
+        kRMSE$spearman[s] <- rmse(knn(pointsCor, i, corMethod = "spearman"))
+                                      # pointsCor, from = 1, to = 52)
+        kRMSE$concord[s] <- rmse(knn(pointsCor, i, corMethod = "concord"))
 }
+}
+save( kRMSE, file = "kRMSE_concord.Rdata")
 toc()
+
+
+
 sapply(kRMSE, min)
 
 # listRMSE$Pearson[j] <- min(kRMSE)

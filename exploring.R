@@ -7,6 +7,7 @@ library(ggplot2)
 library(nortest)
 library(corrplot)
 library(tictoc)
+library(irr)
 
 # Указание рабочей директории
 getwd()

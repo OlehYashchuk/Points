@@ -1,9 +1,28 @@
 knn <- function(data, k, corMethod = "pearson", ...) {
         
-        mCor <- list()
-        mCor$x <- cor(data$x, method = corMethod)
-        mCor$y <- cor(data$y, method = corMethod)
+        nRow <- dim(data$x)[1]
+        nCol <- dim(data$x)[2]
         
+        mCor <- list()
+
+        if (corMethod == "concord") {
+                
+                concord <- matrix(ncol = nCol, nrow = nCol)
+                
+                for (i in 1:nCol) {
+                        for (j in 1:nCol) {
+                                concord[i, j] <- kendall(t(cbind(data.frame(data$x[,c(i,j)]),
+                                        data.frame(data$y[,c(i,j)]))))$value
+                        }
+                }
+                mCor$x <- concord
+                mCor$y <- concord
+                
+        } else {
+                mCor$x <- cor(data$x, method = corMethod)
+                mCor$y <- cor(data$y, method = corMethod)
+        }
+
         dataPredict <- list()    
         dataPredict$x <- data$x
         dataPredict$y <- data$y
@@ -13,7 +32,7 @@ knn <- function(data, k, corMethod = "pearson", ...) {
         
         pointsNumber <- dim(as.matrix(data$x))[1]
         
-        for (i in 1:dim(data$x)[2]) {
+        for (i in 1:nCol) {
                 
                 neighbor <- which(mCor$x[i,] %in% sort(mCor$x[i,], decreasing = TRUE)[c(2:k+1)])
                 
@@ -29,7 +48,7 @@ knn <- function(data, k, corMethod = "pearson", ...) {
                 dataPredict$x[pointsNumber, i] <- meani + numerator / denumerator
         }
         
-        for (i in 1:dim(data$y)[2]) {
+        for (i in 1:nCol) {
                 
                 neighbor <- which(mCor$y[i,] %in% sort(mCor$y[i,], decreasing = TRUE)[c(2:j+1)])
                 
@@ -45,5 +64,6 @@ knn <- function(data, k, corMethod = "pearson", ...) {
                 dataPredict$y[pointsNumber, i] <- meani + numerator / denumerator
         }
         
-        return(list(x = dataPredict$x, y = dataPredict$y))
+        return(list(x = dataPredict$x, y = dataPredict$y, 
+                    xCor = mCor$x, yCor = mCor$y))
 }
