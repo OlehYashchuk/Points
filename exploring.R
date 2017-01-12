@@ -82,13 +82,18 @@ points <- mutate(points,
                  student = as.factor(student))
 
 # Задание новых факторов
-points <- mutate(points,
+# points <- 
+        mutate(points,
                  x = as.integer(x),
                  y = as.integer(y),
                  k = as.factor(k),
                  student = as.factor(student),
-                 dc = sqrt((x-300)^2+(y-300)^2))
-
+                 dc = sqrt((x-300)^2+(y-300)^2),
+                 h = 300,
+                 angle = cos(dc / 300), # пресмотреть
+                 kInt = as.integer(k),
+                 kxy = sqrt(x^2 + y^2))
+cos(0)
 
 # Нормализация
 range((points$x - mean(points$x)) / sd(points$x))
