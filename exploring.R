@@ -83,17 +83,48 @@ points <- mutate(points,
 
 # Задание новых факторов
 # points <- 
-        mutate(points,
+ui <- mutate(points,
                  x = as.integer(x),
                  y = as.integer(y),
                  k = as.factor(k),
                  student = as.factor(student),
-                 dc = sqrt((x-300)^2+(y-300)^2),
-                 h = 300,
-                 angle = cos(dc / 300), # пресмотреть
-                 kInt = as.integer(k),
-                 kxy = sqrt(x^2 + y^2))
-cos(0)
+                 r = sqrt((x-300)^2+(y-300)^2),
+                 xn = (x - min(x))/(max(x)-min(x)),
+                 yn = (y - min(y))/(max(y)-min(y)),
+                 angle = acos(c(0-0, 1-0) %*% c(x-0, y-0)) * 180 / pi
+               # angle = (atan2(600, 300) - atan2(y, x)) * 360 / (2*pi),
+                 # angle1 = cos((x*300+y*300)/
+                                     # sqrt((x^2 + y^2)*(300^2+300^2)))*100
+                 # h = 300,
+                 # angle = cos(dc / 300), # пресмотреть
+                 # kInt = as.integer(k),
+                 # kxy = sqrt(x^2 + y^2),
+       )
+points$x[1]
+acos(c(0-0, 1-0) %*% c(points$x[1]-0, points$y[1]-0)) * 180 / pi
+A <- c(0,1); O <- c(0,0); B <- c(1,0) 
+acos((A-O) %*% (B-O)) * 180 / pi 
+c(B[1] - O[1], B[2] - O[2])
+acos((c(0,1)-c(0,0)) %*% (c(x, y) - c(0,0)))
+c(0-0, 1-0)
+
+range(ui$xn);range(ui$yn)
+
+acos(sum(a*b) / ( sqrt(sum(a * a)) * sqrt(sum(b * b)) ) )
+acos(sum(c(x,xc)*c()) / ( sqrt(sum(a * a)) * sqrt(sum(b * b)) ) )
+
+angle = atan2(a.y, a.x) - atan2(b.y, b.x);
+range(ui$angle)
+
+if (ui$angle < 0) {
+        ui$angle <- ui$angle + 360
+}
+
+cos((x*300+y*0)/
+            sqrt((x^2 + y^2)*(300^2+0^2)))*100
+
+range(ui$r)       
+        cos(0)
 
 # Нормализация
 range((points$x - mean(points$x)) / sd(points$x))
