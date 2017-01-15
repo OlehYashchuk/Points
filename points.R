@@ -1,12 +1,14 @@
 source("knn.R")
 source("rmse.R")
+source("massCor.R")
 
 selectedSteps <- 10
 
 pointsCor <- list()
 # Данные в матричном виде
 # матрица (k, x)
-pointsCor$x <- pointsUn %>% 
+# pointsCor$x <- 
+pointsUn %>% 
         spread(student, coord) %>%
         mutate(k = as.numeric(k)) %>%
         filter(xy == 'x', k <= selectedSteps) %>% 
@@ -71,25 +73,45 @@ selectedSteps <- 10
 # Данные в матричном виде
 # матрица (k, x)
 pointsCor$x <- pointsUn %>% 
-        spread(student, coord) %>%
         mutate(k = as.numeric(k)) %>%
         filter(xy == 'x', k <= selectedSteps) %>% 
+        select(-c(r, angle, xn, yn)) %>%
+        spread(student, coord) %>%
         select(-c(k, xy))
+    
 
 # матрица (k, y)
 pointsCor$y <- pointsUn %>% 
-        spread(student, coord) %>% 
         mutate(k = as.numeric(k)) %>%
         filter(xy == 'y', k <= selectedSteps) %>% 
+        select(-c(r, angle, xn, yn)) %>%
+        spread(student, coord) %>%
+        select(-c(k, xy))
+ 
+##############???????????????????????????????????
+pointsCor$r <- pointsUn %>% 
+        mutate(k = as.numeric(k)) %>%
+        filter(xy == 'x', k <= selectedSteps) %>% 
+        select(-c(coord, angle, xn, yn)) %>%
+        spread(student, r) %>%    
         select(-c(k, xy))
 
-# набор кол-ва ближайших соседей k
-# stepsK <- c(1:5, seq(10, 15, 5))
+pointsCor$angle <- pointsUn %>% 
+        mutate(k = as.numeric(k)) %>%
+        filter(xy == 'x', k <= selectedSteps) %>% 
+        select(-c(coord, r, xn, yn)) %>%
+        spread(student, angle) %>%    
+        select(-c(k, xy))
 
-stepsK <- c(seq(40, 50, 5))
-stepsK <- 500
-# kRMSE <- list()
-# s <- 0
+    
+# набор кол-ва ближайших соседей k
+stepsK <- c(1:5, seq(10, 15, 5))
+
+
+massCor(pointsCor)
+
+kRMSE <- list()
+s <- 0
 tic()
 for (i in stepsK) {
         s <- s + 1
@@ -97,14 +119,14 @@ for (i in stepsK) {
         # c <- knn(pointsCor, i, corMethod = "pearson")
         # kRMSE$j[s] <- j
         kRMSE$k[s] <- i
-        # kRMSE$pearson[s] <- rmse(knn(pointsCor, i, corMethod = "pearson"), pointsCor)
+        kRMSE$pearson[s] <- rmse(knn(pointsCor, i, corMethod = "pearson"), pointsCor)
         #                              # pointsCor, from = 1, to = 52)
         # kRMSE$spearman[s] <- rmse(knn(pointsCor, i, corMethod = "spearman"), pointsCor)
         #                               # pointsCor, from = 1, to = 52)
-        kRMSE$concord[s] <- rmse(knn(pointsCor, i, corMethod = "concord"), pointsCor)
+        # kRMSE$concord[s] <- rmse(knn(pointsCor, i, corMethod = "concord"), pointsCor)
 }
 }
-save( kRMSE, file = "kRMSE_concord.Rdata")
+# save( kRMSE, file = "kRMSE_concord.Rdata")
 toc()
 
 data.frame(round(kRMSE$concord, 3))

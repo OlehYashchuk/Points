@@ -82,28 +82,43 @@ points <- mutate(points,
                  student = as.factor(student))
 
 # Задание новых факторов
-# points <- 
-ui <- mutate(points,
-                 x = as.integer(x),
-                 y = as.integer(y),
-                 k = as.factor(k),
-                 student = as.factor(student),
-                 r = sqrt((x-300)^2+(y-300)^2),
+
+xMin <- min(points$x)
+xMax <- max(points$x)
+
+yMin <- min(points$y)
+yMax <- max(points$y)
+
+range(points$x * (xMax - xMin) + xMin)
+range(points$y * (yMax - yMin) + yMin)
+
+
+points <- mutate(points,
                  xn = (x - min(x))/(max(x)-min(x)),
                  yn = (y - min(y))/(max(y)-min(y)),
-                 angle = acos(c(0-0, 1-0) %*% c(x-0, y-0)) * 180 / pi
-               # angle = (atan2(600, 300) - atan2(y, x)) * 360 / (2*pi),
-                 # angle1 = cos((x*300+y*300)/
-                                     # sqrt((x^2 + y^2)*(300^2+300^2)))*100
-                 # h = 300,
-                 # angle = cos(dc / 300), # пресмотреть
-                 # kInt = as.integer(k),
-                 # kxy = sqrt(x^2 + y^2),
-       )
+                 k = as.factor(k),
+                 # r = sqrt((x-300)^2+(y-300)^2),
+                 r = sqrt((xn-0)^2+(yn-0)^2),
+                 angle = acos(yn)#  * 180 / pi
+                 
+                 # angle = acos((0-0)*(x-0)+(1-0)*(y-0))  * 180 / pi,
+                 # angle = acos(c(0-0, 1-0) %*% c(x-0, y-0)) * 180 / pi
+                 # angle = (atan2(600, 300) - atan2(y, x)) * 360 / (2*pi),
+) #%>% mutate(x = r, y = angle) %>%
+  #  select(-r, -angle)
+
+points
+range(points$x); range(points$y)
+
+
+
 points$x[1]
 acos(c(0-0, 1-0) %*% c(points$x[1]-0, points$y[1]-0)) * 180 / pi
-A <- c(0,1); O <- c(0,0); B <- c(1,0) 
+
+A <- c(0,1); O <- c(0,0); B <- c(.5,.5) 
 acos((A-O) %*% (B-O)) * 180 / pi 
+
+
 c(B[1] - O[1], B[2] - O[2])
 acos((c(0,1)-c(0,0)) %*% (c(x, y) - c(0,0)))
 c(0-0, 1-0)
@@ -123,24 +138,13 @@ if (ui$angle < 0) {
 cos((x*300+y*0)/
             sqrt((x^2 + y^2)*(300^2+0^2)))*100
 
-range(ui$r)       
-        cos(0)
-
-# Нормализация
-range((points$x - mean(points$x)) / sd(points$x))
-sd(points$x)
-range(scale(points$x))
-d <- tapply(points$y, points$student, scale)
-range(d)
-
-
 
 
 # создадим линейный вид данных
 pointsUn <- gather(points, "xy", "coord", 1:2) %>%
-        mutate(k = as.factor(k),
-               student = as.factor(student),
-               xy = as.factor(xy))
+    mutate(k = as.factor(k),
+           student = as.factor(student),
+           xy = as.factor(xy))
 
 ###############################################################################
 # Разведочный анализ данных
@@ -149,8 +153,8 @@ pointsUn <- gather(points, "xy", "coord", 1:2) %>%
 ggplot(data = points, aes(x, y)) +
         geom_point(aes(fill = factor(student)),
                    alpha=0.7, size=2.5, shape=21) + 
-        scale_x_discrete(limits = seq(limMin, limMax, by = limMax/p)) +
-        scale_y_discrete(limits = seq(limMin, limMax, by = limMax/p)) +
+        # scale_x_discrete(limits = seq(limMin, limMax, by = limMax/p)) +
+        # scale_y_discrete(limits = seq(limMin, limMax, by = limMax/p)) +
         theme(legend.position = "none") + guides(fill = 'none') +
         theme_bw() # + labs(title = 'Рассеивание точек')
 
