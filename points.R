@@ -2,66 +2,7 @@ source("knn.R")
 source("rmse.R")
 source("massCor.R")
 
-selectedSteps <- 10
-
-pointsCor <- list()
-# Данные в матричном виде
-# матрица (k, x)
-# pointsCor$x <- 
-pointsUn %>% 
-        spread(student, coord) %>%
-        mutate(k = as.numeric(k)) %>%
-        filter(xy == 'x', k <= selectedSteps) %>% 
-        select(-c(k, xy))
-
-# матрица (k, y)
-pointsCor$y <- pointsUn %>% 
-        spread(student, coord) %>% 
-        mutate(k = as.numeric(k)) %>%
-        filter(xy == 'y', k <= selectedSteps) %>% 
-        select(-c(k, xy))
-
-
-a <- list()
-a$x <- matrix(runif(40, 0, 600), 5, 8)
-a$y <- matrix(runif(40, 0, 600), 5, 8)
-# ggplot() + geom_line(aes(x = c(1:5), y = a[1, ])) +
-#         geom_line(aes(x = c(1:5), y = a[2, ]))
-
-concord <- matrix(ncol = 8, nrow = 8)
-concord1 <- matrix(ncol = 8, nrow = 8)
-a$x <- t(a$x)
-a$y <- t(a$y)
-
-for (i in 1:8) {
-        for (j in 1:8) {
-                concord1[j, i] <- kendall((cbind(data.frame(a$x[c(j,i),]),
-                                                 data.frame(a$y[c(j,i),]))))$value
-        }
-}
-
 isSymmetric(concord)
-
-concord
-students1 <- as.factor(c(1:1052))
-trueStudents1 <- which(colnames(c$x) %in% students1)
-pointsCor
-sum(trueStudents1)
-
-knn(pointsCor, 1, corMethod = "concord")
-kendall(c(pointsCor$x[,1:2], pointsCor$y[,1:2]))
-
-cp <- knn(pointsCor, 5, corMethod = "pearson")
-# c <- knn(pointsCor, 5, corMethod = "concord")
-tic()
-# c1 <- knn(pointsCor, 5, corMethod = "concord") 
-toc()
-
-rmse(cp, pointsCor)
-
-sum(is.na(c$x)) + sum(!is.na(c$x))
-sum(is.na(concord)) + sum(!is.na(concord))
-
 
 tic()
 listRMSE <- list()
@@ -79,7 +20,6 @@ pointsCor$x <- pointsUn %>%
         spread(student, coord) %>%
         select(-c(k, xy))
     
-
 # матрица (k, y)
 pointsCor$y <- pointsUn %>% 
         mutate(k = as.numeric(k)) %>%
@@ -88,27 +28,35 @@ pointsCor$y <- pointsUn %>%
         spread(student, coord) %>%
         select(-c(k, xy))
  
-##############???????????????????????????????????
-pointsCor$r <- pointsUn %>% 
+pointsCor$r <- pointsUnFeature %>% 
         mutate(k = as.numeric(k)) %>%
-        filter(xy == 'x', k <= selectedSteps) %>% 
-        select(-c(coord, angle, xn, yn)) %>%
-        spread(student, r) %>%    
-        select(-c(k, xy))
+        filter(feature == 'r', k <= selectedSteps) %>% 
+        select(-c(x, y, xn, yn)) %>%
+        spread(student, value) %>%    
+        select(-c(k, feature))
 
-pointsCor$angle <- pointsUn %>% 
+pointsCor$angle <- pointsUnFeature %>% 
         mutate(k = as.numeric(k)) %>%
-        filter(xy == 'x', k <= selectedSteps) %>% 
-        select(-c(coord, r, xn, yn)) %>%
-        spread(student, angle) %>%    
-        select(-c(k, xy))
+        filter(feature == 'angle', k <= selectedSteps) %>% 
+        select(-c(x, y, xn, yn)) %>%
+        spread(student, value) %>%    
+        select(-c(k, feature))
 
-    
+c <- massCor(pointsCor$r, pointsCor$angle)
+c$xCor   
+c1 <- knn(pointsCor$r, pointsCor$angle, c$xCor, c$yCor, 5)
+
+c0 <- list()
+c0$x <- pointsCor$r
+c0$y <- pointsCor$angle
+
+
+rmse(c0, c1)
+
+dim(pointsCor$r)[1]
+
 # набор кол-ва ближайших соседей k
 stepsK <- c(1:5, seq(10, 15, 5))
-
-
-massCor(pointsCor)
 
 kRMSE <- list()
 s <- 0

@@ -7,6 +7,9 @@ knn <- function(x, y, xCor, yCor, k, ...) {
     x <- as.matrix(x)
     y <- as.matrix(y)
     
+    nRow <- dim(x)[1]
+    nCol <- dim(x)[2]
+    
     pointsNumber <- dim(as.matrix(x))[1]
     
     for (i in 1:nCol) {

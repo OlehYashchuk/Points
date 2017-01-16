@@ -140,11 +140,17 @@ cos((x*300+y*0)/
 
 
 
-# создадим линейный вид данных
+# создадим линейный вид координат
 pointsUn <- gather(points, "xy", "coord", 1:2) %>%
     mutate(k = as.factor(k),
            student = as.factor(student),
            xy = as.factor(xy))
+
+# создадим линейный вид переменных
+pointsUnFeature <- gather(points, "feature", "value", 7:8) %>%
+        mutate(k = as.factor(k),
+               student = as.factor(student),
+               feature = as.factor(feature))
 
 ###############################################################################
 # Разведочный анализ данных
