@@ -92,52 +92,63 @@ yMax <- max(points$y)
 range(points$x * (xMax - xMin) + xMin)
 range(points$y * (yMax - yMin) + yMin)
 
-
 points <- mutate(points,
-                 xn = (x - min(x))/(max(x)-min(x)),
-                 yn = (y - min(y))/(max(y)-min(y)),
+
                  k = as.factor(k),
-                 # r = sqrt((x-300)^2+(y-300)^2),
-                 r = sqrt((xn-0)^2+(yn-0)^2),
-                 angle = acos(yn)#  * 180 / pi
+                 r = sqrt(x^2+y^2),
+                 angle = acos(y/r) * 180 / pi
                  
-                 # angle = acos((0-0)*(x-0)+(1-0)*(y-0))  * 180 / pi,
-                 # angle = acos(c(0-0, 1-0) %*% c(x-0, y-0)) * 180 / pi
-                 # angle = (atan2(600, 300) - atan2(y, x)) * 360 / (2*pi),
-) #%>% mutate(x = r, y = angle) %>%
-  #  select(-r, -angle)
+                 # cosAlpha = y/r,
+                 # xn = (x - min(x))/(max(x)-min(x)),
+                 # yn = (y - min(y))/(max(y)-min(y)),
+)
+
 
 points
 range(points$x); range(points$y)
 
+check <- mutate(points,
+       
+        xReinc = r*sin(angle * pi / 180),
+        yReinc = r*cos(angle * pi / 180)
+       # k = as.factor(k),
+       # r = sqrt(x^2+y^2),
+       # angle = acos(y/r) * 180 / pi
+       
+       # cosAlpha = y/r,
+       # xn = (x - min(x))/(max(x)-min(x)),
+       # yn = (y - min(y))/(max(y)-min(y)),
+)
+check
 
-
-points$x[1]
-acos(c(0-0, 1-0) %*% c(points$x[1]-0, points$y[1]-0)) * 180 / pi
-
-A <- c(0,1); O <- c(0,0); B <- c(.5,.5) 
-acos((A-O) %*% (B-O)) * 180 / pi 
-
-
-c(B[1] - O[1], B[2] - O[2])
-acos((c(0,1)-c(0,0)) %*% (c(x, y) - c(0,0)))
-c(0-0, 1-0)
-
-range(ui$xn);range(ui$yn)
-
-acos(sum(a*b) / ( sqrt(sum(a * a)) * sqrt(sum(b * b)) ) )
-acos(sum(c(x,xc)*c()) / ( sqrt(sum(a * a)) * sqrt(sum(b * b)) ) )
-
-angle = atan2(a.y, a.x) - atan2(b.y, b.x);
-range(ui$angle)
-
-if (ui$angle < 0) {
-        ui$angle <- ui$angle + 360
-}
-
-cos((x*300+y*0)/
-            sqrt((x^2 + y^2)*(300^2+0^2)))*100
-
+# 
+# 
+# points$x[1]
+# acos(c(0-0, 1-0) %*% c(points$x[1]-0, points$y[1]-0)) * 180 / pi
+# 
+# A <- c(0,1); O <- c(0,0); B <- c(.5,.5) 
+# acos((A-O) %*% (B-O)) * 180 / pi 
+# 
+# 
+# c(B[1] - O[1], B[2] - O[2])
+# acos((c(0,1)-c(0,0)) %*% (c(x, y) - c(0,0)))
+# c(0-0, 1-0)
+# 
+# range(ui$xn);range(ui$yn)
+# 
+# acos(sum(a*b) / ( sqrt(sum(a * a)) * sqrt(sum(b * b)) ) )
+# acos(sum(c(x,xc)*c()) / ( sqrt(sum(a * a)) * sqrt(sum(b * b)) ) )
+# 
+# angle = atan2(a.y, a.x) - atan2(b.y, b.x);
+# range(ui$angle)
+# 
+# if (ui$angle < 0) {
+#         ui$angle <- ui$angle + 360
+# }
+# 
+# cos((x*300+y*0)/
+#             sqrt((x^2 + y^2)*(300^2+0^2)))*100
+# 
 
 
 # создадим линейный вид координат
@@ -147,7 +158,7 @@ pointsUn <- gather(points, "xy", "coord", 1:2) %>%
            xy = as.factor(xy))
 
 # создадим линейный вид переменных
-pointsUnFeature <- gather(points, "feature", "value", 7:8) %>%
+pointsUnFeature <- gather(points, "feature", "value", 5:6) %>%
         mutate(k = as.factor(k),
                student = as.factor(student),
                feature = as.factor(feature))

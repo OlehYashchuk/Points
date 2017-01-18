@@ -8,7 +8,7 @@ tic()
 listRMSE <- list()
 pointsCor <- list()
 s <- 0
-for (j in 10:10) {
+# for (j in 10:10) {
 selectedSteps <- 10
 
 # Данные в матричном виде
@@ -16,7 +16,7 @@ selectedSteps <- 10
 pointsCor$x <- pointsUn %>% 
         mutate(k = as.numeric(k)) %>%
         filter(xy == 'x', k <= selectedSteps) %>% 
-        select(-c(r, angle, xn, yn)) %>%
+        select(-c(r, angle)) %>% #, xn, yn
         spread(student, coord) %>%
         select(-c(k, xy))
     
@@ -24,27 +24,61 @@ pointsCor$x <- pointsUn %>%
 pointsCor$y <- pointsUn %>% 
         mutate(k = as.numeric(k)) %>%
         filter(xy == 'y', k <= selectedSteps) %>% 
-        select(-c(r, angle, xn, yn)) %>%
+        select(-c(r, angle)) %>% #, xn, yn
         spread(student, coord) %>%
         select(-c(k, xy))
  
 pointsCor$r <- pointsUnFeature %>% 
         mutate(k = as.numeric(k)) %>%
         filter(feature == 'r', k <= selectedSteps) %>% 
-        select(-c(x, y, xn, yn)) %>%
+        select(-c(x, y)) %>% #, xn, yn
         spread(student, value) %>%    
         select(-c(k, feature))
 
 pointsCor$angle <- pointsUnFeature %>% 
         mutate(k = as.numeric(k)) %>%
         filter(feature == 'angle', k <= selectedSteps) %>% 
-        select(-c(x, y, xn, yn)) %>%
+        select(-c(x, y)) %>% #, xn, yn
         spread(student, value) %>%    
         select(-c(k, feature))
 
 c <- massCor(pointsCor$r, pointsCor$angle)
-c$xCor   
 c1 <- knn(pointsCor$r, pointsCor$angle, c$xCor, c$yCor, 5)
+
+
+predicted <- list()
+predicted$x <- c1$x * sin(c1$y * pi / 180)
+predicted$y <- c1$x * cos(c1$y * pi / 180)
+range(predicted$x); range(predicted$y)
+range(points$x); range(points$y)
+        
+
+rmse(pointsCor, predicted, 1, 52)
+
+
+        check <- mutate(points,
+                        
+                        xReinc = r*sin(angle * pi / 180),
+                        yReinc = r*cos(angle * pi / 180)
+                        # k = as.factor(k),
+                        # r = sqrt(x^2+y^2),
+                        # angle = acos(y/r) * 180 / pi
+                        
+                        # cosAlpha = y/r,
+                        # xn = (x - min(x))/(max(x)-min(x)),
+                        # yn = (y - min(y))/(max(y)-min(y)),
+        )
+check
+        
+a <- matrix(c(1:10), 2, 5)
+b <- matrix(c(1:10), 2, 5)
+a+b
+
+c <- b*sin(a)
+d <- b*cos(a)
+
+16*sin(8)
+
 
 c0 <- list()
 c0$x <- pointsCor$r
@@ -73,7 +107,7 @@ for (i in stepsK) {
         #                               # pointsCor, from = 1, to = 52)
         # kRMSE$concord[s] <- rmse(knn(pointsCor, i, corMethod = "concord"), pointsCor)
 }
-}
+# }
 # save( kRMSE, file = "kRMSE_concord.Rdata")
 toc()
 
