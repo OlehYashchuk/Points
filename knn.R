@@ -2,7 +2,7 @@ knn <- function(data, cor, k, ...) {
         
         predict <- data
         
-        # data <- as.matrix(data)
+        data <- as.matrix(data)
         
         nRow <- dim(data)[1]
         nCol <- dim(data)[2]

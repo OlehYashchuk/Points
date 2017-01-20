@@ -1,6 +1,5 @@
 rm(list = ls())
 
-# Подключение пакетов
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -9,45 +8,41 @@ library(corrplot)
 library(tictoc)
 library(irr)
 
-# Указание рабочей директории
 getwd()
 # setwd("d:/Oleh/Репетиторство/Points")
 # setwd("D:/D/Репетиторство/Points")
 
-# Считывание данных
 points <- read.table("Данные/points.txt", 
                      header = F, 
                      col.names = c("x", "y"), 
                      sep = ";")
 
 ###############################################################################
-# Обработка исходных данных
-###############################################################################
-limMin <- 0                      # Границы области
-limMax <- 600                    # Границы области
-p <- 15                          # Кол-во точек для каждого респондента
-st <- dim(points)[1]/p           # Кол-во респондентов
-k <- rep(1:15, times = dim(points)[1]/p)        # номера шага
-student <- rep(1:st, each = dim(points)[1]/st)  # номер респондента 
+# data preprocessing
 
-# Объединение данных
+p <- 15                          # number of points
+st <- dim(points)[1]/p           # numbers of users
+k <- rep(1:15, times = dim(points)[1]/p)        # numbers of steps
+student <- rep(1:st, each = dim(points)[1]/st)  # numbers of students
+
+# mergin data
 points <- tbl_df(cbind(points, k, student))
 colnames(points) <- c("x", "y", "k", 'student')
 
-summary(points)                  # Базовые описательные статистики
+summary(points)                  # base statistics
 
-points[which(points$x>600 | points$y>600),] # Поиск выбросов
+points[which(points$x>600 | points$y>600),] # looking for outliers
 # Чистка данных
 exclude <- c(5, 14, 15, 20, 22, 24, 34, 37, 42, 44, 48)
-'%!in%' <- function(x,y)!('%in%'(x,y)) # задание оператора тип "not in"
+'%!in%' <- function(x,y)!('%in%'(x,y)) # define a new operator like "!in"
 
-# Исключение респондентов со списка "exclude"
+# excluding outliers
 points <- points %>% 
         filter(x <= 600, y <= 600) %>% 
         filter(student %!in%  exclude) %>%
         select(-student) 
 
-# Перезапись номера шага и номера респондента
+# data processing technical step
 st <- dim(points)[1]/p
 student <- rep(1:st, each = dim(points)[1]/st)
 
@@ -56,82 +51,103 @@ points <- mutate(points,
                  k =  k)
 
 ###############################################################################
-# Генерация новых случайных респондентов
-###############################################################################
-addStudents <- 1000 # кол-во новых респондентов
+# generation of new points
 
-set.seed(998)           # для воспроизводимости случайного набора данных
-x <- rnorm(addStudents * p, 300, 73) # координата "x" из норм. распр.
-set.seed(999)           # для воспроизводимости случайного набора данных
-y <- rnorm(addStudents * p, 300, 73) # координата "y" из норм. распр.
+addStudents <- 1000 # number of new users
+
+set.seed(998)           # for reproducibility
+x <- rnorm(addStudents * p, 300, 73) # Gaussian x coord
+set.seed(999)           
+y <- rnorm(addStudents * p, 300, 73) # Gaussian y coord
 range(x); range(y)
 
-# Формируем данные с новыми респондентами
-st <- st + addStudents # кол-во респондентов после добавления новых
-student <- rep((st-addStudents+1):st, each = p) # номера новых респондентов
-k <- rep(1:15, times = addStudents) # номер шага для новых респондентов
+# data processing technical steps
+st <- st + addStudents # total number of users
+student <- rep((st-addStudents+1):st, each = p) # numbers of new users
+k <- rep(1:15, times = addStudents) # numbers of steps of new users
+pointsNew <- tbl_df(cbind(x, y, k, student)) # merging new dataset
 
-pointsNew <- tbl_df(cbind(x, y, k, student)) # объединяем массив новых данных
-points <- bind_rows(points, pointsNew) # объединяем новые данные со старыми
+points <- bind_rows(points, pointsNew) # merging all data in one dataset
 
-# задаём типы данных
+# assignment data types
 points <- mutate(points,
                  x = as.integer(x),
                  y = as.integer(y),
                  k = as.factor(k),
                  student = as.factor(student))
 
-# Задание новых факторов
-
-xMin <- min(points$x)
-xMax <- max(points$x)
-
-yMin <- min(points$y)
-yMax <- max(points$y)
-
-range(points$x * (xMax - xMin) + xMin)
-range(points$y * (yMax - yMin) + yMin)
-
+# creating new variables
 points <- mutate(points,
 
                  k = as.factor(k),
                  r = sqrt(x^2+y^2),
                  alpha = acos(y/r) * 180 / pi
-                 
+
                  # cosAlpha = y/r,
                  # xn = (x - min(x))/(max(x)-min(x)),
                  # yn = (y - min(y))/(max(y)-min(y)),
 )
 
-
-points
-range(points$x); range(points$y)
-
-check <- mutate(points,
-       
-        xReinc = r*sin(alpha * pi / 180),
-        yReinc = r*cos(alpha * pi / 180)
-       # k = as.factor(k),
-       # r = sqrt(x^2+y^2),
-       # alpha = acos(y/r) * 180 / pi
-       
-       # cosAlpha = y/r,
-       # xn = (x - min(x))/(max(x)-min(x)),
-       # yn = (y - min(y))/(max(y)-min(y)),
-)
-check
-
-sum(check$x - check$xReinc)
-identical(check$x, as.integer(check$xReinc))
-
-# создадим линейный вид координат
+# tidy set of x an y
 pointsUn <- gather(points, "xy", "coord", 1:2) %>%
-    mutate(k = as.factor(k),
-           student = as.factor(student),
-           xy = as.factor(xy))
+        select(-c(r, alpha)) %>%
+        mutate(k = as.factor(k),
+               student = as.factor(student),
+               xy = as.factor(xy))
 
-# создадим линейный вид переменных
+# tidy set of new variables
 pointsUnFeature <- gather(points, "feature", "value", 5:6) %>%
+        select(-c(x, y)) %>%
         mutate(k = as.factor(k),
                student = as.factor(student),
                feature = as.factor(feature))
+
+
+
+
+
+
+
+
+
+###############################################################################
+# test space
+
+# normalization
+# points <- mutate(points,
+#                  
+#                  x = x / 600,
+#                  y = y / 600
+# )
+# points <- mutate(points,
+#                  
+#                  k = as.factor(k),
+#                  r = sqrt(x^2+y^2),
+#                  alpha = acos(y/r) #* 180 / pi
+# )
+
+
+# checking the correctness of the new variables and normalization
+points
+range(points$x); range(points$y)
+range(points$r); range(points$alpha)
+
+check <- mutate(points,
+                
+                # xReinc = r*sin(alpha * pi / 180),
+                # yReinc = r*cos(alpha * pi / 180)
+                
+                xReinc = r*sin(alpha) * 600,
+                yReinc = r*cos(alpha) * 600
+                
+                # k = as.factor(k),
+                # r = sqrt(x^2+y^2),
+                # alpha = acos(y/r) * 180 / pi
+                
+                # cosAlpha = y/r,
+                # xn = (x - min(x))/(max(x)-min(x)),
+                # yn = (y - min(y))/(max(y)-min(y)),
+)
+
+sum(check$x - check$xReinc)
+identical(check$x, as.integer(check$xReinc))

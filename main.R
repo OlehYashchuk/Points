@@ -1,45 +1,41 @@
 source("knn.R")
 source("rmse.R")
 source("concordance.R")
-# source("massCor.R")
 
-# Число точек учавтсвующих в предсказании
+# number of points that will be includet in prediciton model
 selectedSteps <- 10
 
-# Данные в матричном виде
+# transformation of data into matrix forms
 pointMatrix <- list()
 
 pointMatrix$x <- pointsUn %>% 
         mutate(k = as.numeric(k)) %>%
         filter(xy == 'x', k <= selectedSteps) %>% 
-        select(-c(r, alpha)) %>% #, xn, yn
         spread(student, coord) %>%
         select(-c(k, xy))
     
 pointMatrix$y <- pointsUn %>% 
         mutate(k = as.numeric(k)) %>%
         filter(xy == 'y', k <= selectedSteps) %>% 
-        select(-c(r, alpha)) %>% #, xn, yn
         spread(student, coord) %>%
         select(-c(k, xy))
  
 pointMatrix$r <- pointsUnFeature %>% 
         mutate(k = as.numeric(k)) %>%
         filter(feature == 'r', k <= selectedSteps) %>% 
-        select(-c(x, y)) %>% #, xn, yn
         spread(student, value) %>%    
         select(-c(k, feature))
 
 pointMatrix$alpha <- pointsUnFeature %>% 
         mutate(k = as.numeric(k)) %>%
         filter(feature == 'alpha', k <= selectedSteps) %>% 
-        select(-c(x, y)) %>% #, xn, yn
         spread(student, value) %>%    
         select(-c(k, feature))
 
+# correlation matrices
 corMatrix <- list()
-corMatrix$r <- cor(pointMatrix$r, method = 'spearman')
-corMatrix$alpha <- cor(pointMatrix$alpha, method = 'spearman')
+corMatrix$r <- cor(pointMatrix$r, method = 'pearson')
+corMatrix$alpha <- cor(pointMatrix$alpha, method = 'pearson')
 
 # corMatrix$r <- concordance(pointMatrix$r, pointMatrix$alpha)
 
@@ -50,11 +46,12 @@ corMatrix$alpha <- cor(pointMatrix$alpha, method = 'spearman')
 # predicted$y <- predicted$r * cos(predicted$alpha * pi / 180)
 # sapply(predicted, range)
 
-# набор кол-ва ближайших соседей k
+# numbers of k nearest neighbors
 stepsK <- c(1:5, seq(10, 50, 5))
 
-# RMSE <- list()
+RMSE <- list()
 s <- 0
+
 tic()
 for (i in stepsK) {
         s <- s + 1
@@ -67,11 +64,13 @@ for (i in stepsK) {
         
         RMSE$k[s] <- i
         RMSE$pearson[s] <- rmse(true = pointMatrix, estimate = predicted)
-        # print(RMSE$pearson[s])
+        print(RMSE$pearson[s])
+        
 }
-# save(RMSE, file = "RMSE_new_features.Rdata")
 toc()
+
 sapply(RMSE, min)
+
 
 # save(RMSE_modified, file = "Данные/RMSE_modified.Rdata")
 # load("Данные/RMSE_modified.Rdata", verbose = TRUE)
@@ -80,6 +79,7 @@ sapply(RMSE, min)
 
 
 ################################################################################
+# accuracy visualisation
 
 plotFrom <- 2
 
@@ -136,6 +136,6 @@ ggplot(kRMSEtbl, aes(x = k)) +
 #        height = 7, width = 12)
 
 
-# Графики по простому
+# easy plot
 # plot(kRMSE$k, kRMSE$pearson, type = 'o', xlim = c(1, max(stepsK)))
 # plot(kRMSE$k, kRMSE$spearman, type = 'o', xlim = c(1, max(stepsK)))
